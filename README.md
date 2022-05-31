@@ -47,3 +47,21 @@ With the containers up and running, run the tests:
 $ docker compose exec web python -m pytest
 ```
 
+Coverage report:
+```bash
+$ docker compose exec web python -m pytest --cov="."
+```
+
+### Code quality
+
+```bash
+$ docker compose exec web black .
+```
+
+```bash
+$ docker compose exec web flake8 .
+```
+
+```bash
+$ docker compose exec web isort .
+```
