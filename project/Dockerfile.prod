@@ -1,0 +1,74 @@
+# Base Image
+###############################################
+FROM python:3.10-slim as python-base
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN addgroup --system app && adduser --system --group app
+
+# create the directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
+# set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    POETRY_HOME="/opt/poetry" \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1 \
+    PYSETUP_PATH="/opt/pysetup" \
+    VENV_PATH="/opt/pysetup/.venv" \
+    PYTHONPATH="/home/app/web"
+
+# prepend poetry and venv to path
+ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+
+# Builder Image
+###############################################
+FROM python-base as builder-base
+
+# install system dependencies
+RUN apt-get update && apt-get install -y  \
+    build-essential \
+    curl  \
+    netcat  \
+    gcc \
+    postgresql \
+    && rm -rf /var/lib/apt/lists/*
+
+# install poetry
+ENV POETRY_VERSION=1.2.0a2
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# copy project requirement files here to ensure they will be cached.
+WORKDIR $PYSETUP_PATH
+COPY poetry.lock pyproject.toml ./
+
+# install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
+RUN poetry install --no-root
+
+# Production Image
+###############################################
+FROM builder-base as development
+
+ENV ENVIRONMENT prod
+ENV TESTING 0
+
+WORKDIR $APP_HOME
+
+# add app
+COPY . .
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+
+# run gunicorn
+CMD gunicorn --bind 0.0.0.0:$PORT app.main:app -k uvicorn.workers.UvicornWorker
+
