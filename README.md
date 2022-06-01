@@ -1,7 +1,10 @@
 # Test-Driven Development with FastAPI and Docker
 
-Based on the awesome testdriven.io [Test-Driven Development with FastAPI and Docker](https://testdriven.io/courses/tdd-fastapi/)
- course (with a few changes). Management of python dependencies is done with Poetry (v2) instead, and the GitHub registry used is `ghcr.io` using `GITHUB_TOKEN`.
+Based on the awesome [Test-Driven Development with FastAPI and Docker](https://testdriven.io/courses/tdd-fastapi/)
+ course, with a few changes:. 
+
+* Management of python dependencies is done with`pyenv` and `poetry` (v2) instead of `pip`.
+* Instead of the general Package registry with a [PAT](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#considering-cross-repository-access), the GitHub Container registry `ghcr.io` is used with the more secure `GITHUB_TOKEN`.
 
 ![Continuous Integration and Delivery](https://github.com/tymyrddin/fastapi-tdd-docker/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=main)
 
