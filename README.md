@@ -1,7 +1,7 @@
 # Test-Driven Development with FastAPI and Docker
 
 Based on the awesome testdriven.io [Test-Driven Development with FastAPI and Docker](https://testdriven.io/courses/tdd-fastapi/)
- course (with a few changes). Management of python dependencies is done with Poetry (v2) instead, and the Github registry used is `ghcr.io` using `GITHUB_TOKEN`
+ course (with a few changes). Management of python dependencies is done with Poetry (v2) instead, and the GitHub registry used is `ghcr.io` using `GITHUB_TOKEN`.
 
 ![Continuous Integration and Delivery](https://github.com/tymyrddin/fastapi-tdd-docker/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=main)
 
@@ -35,7 +35,7 @@ $ docker compose exec web-db psql -U postgres
 
 Then connect to the database with:
 
-```postgresql
+```
 postgres=# \c web_dev
 postgres=# \dt
 postgres=# \q
