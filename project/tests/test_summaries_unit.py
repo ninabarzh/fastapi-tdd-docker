@@ -8,7 +8,7 @@ from datetime import datetime
 
 import pytest
 
-from app.api import crud, summaries
+from app.api import crud, summaries  # noqa
 
 
 URL = "https://foo.bar"
@@ -226,7 +226,7 @@ def test_update_summary_invalid(test_app, monkeypatch, summary_id, payload, stat
 
 def test_update_summary_invalid_url(test_app):
     response = test_app.put(
-        f"/summaries/1/",
+        "/summaries/1/",
         data=json.dumps({"url": "invalid://url", "summary": UPDATED_MSG}),
     )
     assert response.status_code == 422
