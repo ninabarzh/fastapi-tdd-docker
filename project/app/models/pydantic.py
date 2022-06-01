@@ -1,5 +1,10 @@
-# project/app/models/pydantic.py
-# https://pydantic-docs.helpmanual.io/usage/models/
+""" project/app/models/pydantic.py
+    https://pydantic-docs.helpmanual.io/usage/models/
+
+   isort:skip_file
+"""
+
+#
 
 from pydantic import BaseModel, AnyHttpUrl
 

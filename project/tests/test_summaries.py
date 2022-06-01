@@ -1,4 +1,7 @@
-# project/tests/test_summaries.py
+""" project/tests/test_summaries.py
+
+   isort:skip_file
+"""
 
 import json
 import pytest

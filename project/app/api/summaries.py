@@ -1,5 +1,8 @@
-# project/app/api/summaries.py
-# https://fastapi.tiangolo.com/tutorial/body/
+""" project/app/api/summaries.py
+    https://fastapi.tiangolo.com/tutorial/body/
+
+   isort:skip_file
+"""
 
 from typing import List
 
