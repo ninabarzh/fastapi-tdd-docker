@@ -4,9 +4,9 @@ Based on the awesome [Test-Driven Development with FastAPI and Docker](https://t
  course, with a few changes:. 
 
 * Management of python dependencies is done with`pyenv` and `poetry` (v2) instead of `pip`.
-* Instead of the general Package registry with a [PAT](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#considering-cross-repository-access), the GitHub Container registry `ghcr.io` is used with the more secure `GITHUB_TOKEN`.
-
+* Instead of the general Package registry with a [PAT](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#considering-cross-repository-access), the GitHub Container registry `ghcr.io` is used with the more secure `GITHUB_TOKEN`. 
 ![Continuous Integration and Delivery](https://github.com/tymyrddin/fastapi-tdd-docker/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=main)
+* Using `docker compose` (the docker-compose-plugin) instead of `docker-compose` (the older standalone version).
 
 ### Build
 
@@ -28,7 +28,22 @@ Bring down and remove volumes:
 $ docker compose down -v
 ```
 
-### Database access
+### Database
+
+```bash
+$ docker compose exec web aerich init -t app.db.TORTOISE_ORM
+```
+
+Init:
+
+```bash
+$ docker compose exec web aerich init-db
+```
+
+Upgrade:
+```bash
+$ docker compose exec web aerich upgrade
+```
 
 Access the database via `psql` with:
 
@@ -70,3 +85,15 @@ $ docker compose exec web flake8 .
 ```bash
 $ docker compose exec web isort .
 ```
+
+## Troubleshooting
+
+### Internal Server Error
+
+```
+$ docker compose logs web
+...
+fastapi-tdd-docker-web-1  | tortoise.exceptions.OperationalError: relation "textsummary" does not exist
+```
+
+When building a fresh docker container with db and app, make sure to execute migration script during the container building.

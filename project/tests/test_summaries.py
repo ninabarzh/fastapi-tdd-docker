@@ -4,7 +4,11 @@
 """
 
 import json
+from datetime import datetime
+
 import pytest
+
+from app.api import crud, summaries
 
 
 URL = "https://foo.bar"
@@ -12,11 +16,16 @@ SUMMARIES_ROUTE = "/summaries/"
 FIELD_REQUIRED_MSG = "field required"
 MISSING_VALUE_ERROR_MSG = "value_error.missing"
 SUMMARIES_ID_999_ROUTE = "/summaries/999/"
+SUMMARIES_ID_1_ROUTE = "/summaries/1/"
 SUMMARY_NOT_FOUND_MSG = "Summary not found"
 UPDATED_MSG = "updated!"
 
 
-def test_create_summary(test_app_with_db):
+def test_create_summary(test_app_with_db, monkeypatch):
+    def mock_generate_summary(summary_id, url):
+        return None
+
+    monkeypatch.setattr(summaries, "generate_summary", mock_generate_summary)
     # Given: test_app_with_db
     # When:
     response = test_app_with_db.post(SUMMARIES_ROUTE, data=json.dumps({"url": URL}))
@@ -50,23 +59,24 @@ def test_create_summaries_invalid_json(test_app):
     assert response.json()["detail"][0]["msg"] == "URL scheme not permitted"
 
 
-def test_read_summary(test_app_with_db):
-    # Given: test_app_with_db
-    response = test_app_with_db.post(SUMMARIES_ROUTE, data=json.dumps({"url": URL}))
-    summary_id = response.json()["id"]
+def test_read_summary(test_app, monkeypatch):
+    # Given:
+    test_data = {
+        "id": 1,
+        "url": URL,
+        "summary": "summary",
+        "created_at": datetime.utcnow().isoformat(),
+    }
 
+    async def mock_get(id):
+        return test_data
+
+    monkeypatch.setattr(crud, "get", mock_get)
     # When:
-    response = test_app_with_db.get(f"/summaries/{summary_id}/")
+    response = test_app.get(SUMMARIES_ID_1_ROUTE)
     # Then:
     assert response.status_code == 200
-
-    # When:
-    response_dict = response.json()
-    # Then:
-    assert response_dict["id"] == summary_id
-    assert response_dict["url"] == URL
-    assert response_dict["summary"]
-    assert response_dict["created_at"]
+    assert response.json() == test_data
 
 
 def test_read_summary_incorrect_id(test_app_with_db):
@@ -93,32 +103,51 @@ def test_read_summary_incorrect_id(test_app_with_db):
     }
 
 
-def test_read_all_summaries(test_app_with_db):
-    # Given: test_app_with_db
-    response = test_app_with_db.post(SUMMARIES_ROUTE, data=json.dumps({"url": URL}))
-    summary_id = response.json()["id"]
+def test_read_all_summaries(test_app, monkeypatch):
+    test_data = [
+        {
+            "id": 1,
+            "url": URL,
+            "summary": "summary",
+            "created_at": datetime.utcnow().isoformat(),
+        },
+        {
+            "id": 2,
+            "url": "https://testdriven.io",
+            "summary": "summary",
+            "created_at": datetime.utcnow().isoformat(),
+        },
+    ]
 
-    # When:
-    response = test_app_with_db.get(SUMMARIES_ROUTE)
-    # Then:
+    async def mock_get_all():
+        return test_data
+
+    monkeypatch.setattr(crud, "get_all", mock_get_all)
+
+    response = test_app.get("/summaries/")
     assert response.status_code == 200
-
-    # When
-    response_list = response.json()
-    # Then
-    assert len(list(filter(lambda d: d["id"] == summary_id, response_list))) == 1
+    assert response.json() == test_data
 
 
-def test_remove_summary(test_app_with_db):
-    # Given: test_app_with_db
-    response = test_app_with_db.post(SUMMARIES_ROUTE, data=json.dumps({"url": URL}))
-    summary_id = response.json()["id"]
+def test_remove_summary(test_app, monkeypatch):
+    async def mock_get(id):
+        return {
+            "id": 1,
+            "url": URL,
+            "summary": "summary",
+            "created_at": datetime.utcnow().isoformat(),
+        }
 
-    # When:
-    response = test_app_with_db.delete(f"/summaries/{summary_id}/")
-    # Then:
+    monkeypatch.setattr(crud, "get", mock_get)
+
+    async def mock_delete(id):
+        return id
+
+    monkeypatch.setattr(crud, "delete", mock_delete)
+
+    response = test_app.delete(SUMMARIES_ID_1_ROUTE)
     assert response.status_code == 200
-    assert response.json() == {"id": summary_id, "url": URL}
+    assert response.json() == {"id": 1, "url": URL}
 
 
 def test_remove_summary_incorrect_id(test_app_with_db):
@@ -130,26 +159,29 @@ def test_remove_summary_incorrect_id(test_app_with_db):
     assert response.json()["detail"] == SUMMARY_NOT_FOUND_MSG
 
 
-def test_update_summary(test_app_with_db):
-    # Given: test_app_with_db
-    response = test_app_with_db.post("/summaries/", data=json.dumps({"url": URL}))
-    summary_id = response.json()["id"]
+def test_update_summary(test_app, monkeypatch):
+    # Given:
+    test_request_payload = {"url": URL, "summary": "updated"}
+    test_response_payload = {
+        "id": 1,
+        "url": URL,
+        "summary": "summary",
+        "created_at": datetime.utcnow().isoformat(),
+    }
+
+    async def mock_put(id, payload):
+        return test_response_payload
+
+    monkeypatch.setattr(crud, "put", mock_put)
 
     # When:
-    response = test_app_with_db.put(
-        f"/summaries/{summary_id}/",
-        data=json.dumps({"url": URL, "summary": UPDATED_MSG}),
+    response = test_app.put(
+        SUMMARIES_ID_1_ROUTE,
+        data=json.dumps(test_request_payload),
     )
     # Then:
     assert response.status_code == 200
-
-    # When:
-    response_dict = response.json()
-    # Then:
-    assert response_dict["id"] == summary_id
-    assert response_dict["url"] == URL
-    assert response_dict["summary"] == UPDATED_MSG
-    assert response_dict["created_at"]
+    assert response.json() == test_response_payload
 
 
 @pytest.mark.parametrize(
@@ -217,7 +249,7 @@ def test_update_summary_invalid(
 
 def test_update_summary_invalid_url(test_app):
     response = test_app.put(
-        "/summaries/1/",
+        SUMMARIES_ID_1_ROUTE,
         data=json.dumps({"url": "invalid://url", "summary": UPDATED_MSG}),
     )
     assert response.status_code == 422
