@@ -2,7 +2,7 @@
 name = "fastapi-tdd-docker"
 version = "0.1.0"
 description = ""
-authors = ["Ty Myrddin <you@example.com>"]
+authors = ["Ty Myrddin <info@tymyrddin.space>"]
 readme = "README.md"
 packages = [{include = "fastapi_tdd_docker"}]
 
@@ -30,6 +30,7 @@ pytest-xdist = "~2.5.0"
 tortoise_orm = "app.db.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
