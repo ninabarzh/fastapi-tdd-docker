@@ -2,34 +2,26 @@
 ###############################################
 FROM python:3.10-slim as python-base
 
-# create directory for the app user
-RUN mkdir -p /home/app
-
-# create the app user
-RUN addgroup --system app && adduser --system --group app
-
-# create the directories
-ENV HOME=/home/app
-ENV APP_HOME=/home/app/web
-RUN mkdir $APP_HOME
-WORKDIR $APP_HOME
-
 # set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_NO_INTERACTION=1 \
     PYSETUP_PATH="/opt/pysetup" \
-    VENV_PATH="/opt/pysetup/.venv" \
-    PYTHONPATH="/home/app/web"
+    VENV_PATH="/opt/pysetup/.venv"
 
 # prepend poetry and venv to path
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
 # Builder Image
 ###############################################
-FROM python-base as builder-base
+FROM python-base as builder
+
+ENV PYTHONPATH="/usr/src/app"
 
 # install system dependencies
 RUN apt-get update && apt-get install -y  \
@@ -51,24 +43,42 @@ COPY poetry.lock pyproject.toml ./
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
 RUN poetry install --no-root
 
-# Production Image
-###############################################
-FROM builder-base as development
+# lint
+WORKDIR "/usr/src/app"
+RUN flake8 .
+RUN black --exclude=migrations .
+RUN isort .
 
+# Final image
+###############################################
+FROM python-base as final
+
+# set environment variables
 ENV ENVIRONMENT prod
 ENV TESTING 0
 
+COPY --from=builder $VENV_PATH $VENV_PATH
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN addgroup --system app && adduser --system --group app
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
 # add app
 COPY . .
 
 # chown all the files to the app user
-RUN chown -R app:app $APP_HOME
+RUN chown -R app:app $HOME
 
 # change to the app user
 USER app
 
 # run gunicorn
 CMD gunicorn --bind 0.0.0.0:$PORT app.main:app -k uvicorn.workers.UvicornWorker
-
