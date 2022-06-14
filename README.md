@@ -1,5 +1,8 @@
 # Test-Driven Development with FastAPI and Docker
 
+![Coverage](https://img.shields.io/badge/coverage-91%25-green) 
+![Continuous Integration and Delivery](https://github.com/tymyrddin/fastapi-tdd-docker/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=main)
+
 Based on the awesome [Test-Driven Development with FastAPI and Docker](https://testdriven.io/courses/tdd-fastapi/) 
 course from testdriven.io, with a few changes: Management of python dependencies is done with`pyenv` and `poetry` (v2) 
 instead of `pip`; Instead of the general Package registry with a 
@@ -8,8 +11,6 @@ we used the GitHub Container registry `ghcr.io` the more secure `GITHUB_TOKEN`; 
 (the docker-compose-plugin) instead of `docker-compose` (the older standalone version).
 
 ## Workflow
-
-![Continuous Integration and Delivery](https://github.com/tymyrddin/fastapi-tdd-docker/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=main)
 
 ### Build
 
