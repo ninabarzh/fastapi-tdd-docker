@@ -19,7 +19,7 @@ newspaper3k = "^0.2.8"
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
 flake8 = "^7.0.0"
-pytest = "^6.2.5"
+pytest = "^8.0.0"
 coverage = "^7.0.0"
 pytest-cov = "^6.0.0"
 requests = "^2.26.0"
