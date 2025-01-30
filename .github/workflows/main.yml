@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.7.0
+        uses: actions/checkout@v4.2.2
         with:
           ref: main
       - name: Log in to GitHub Container Registry
@@ -52,7 +52,7 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.7.0
+        uses: actions/checkout@v4.2.2
         with:
           ref: main
       - name: Log in to GitHub Container Registry
@@ -107,7 +107,7 @@ jobs:
       HEROKU_REGISTRY_IMAGE: registry.heroku.com/${HEROKU_APP_NAME}/summarizer
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.7.0
+        uses: actions/checkout@v4.2.2
         with:
           ref: main
       - name: Log in to GitHub Container Registry
