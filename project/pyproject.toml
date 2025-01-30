@@ -23,7 +23,7 @@ pytest = "^6.2.5"
 coverage = "^6.4"
 pytest-cov = "^6.0.0"
 requests = "^2.26.0"
-isort = "~5.10.1"
+isort = "~5.13.0"
 pytest-xdist = "~3.6.0"
 
 [tool.aerich]
