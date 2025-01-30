@@ -1,6 +1,6 @@
 # Base Image
 ###############################################
-FROM python:3.10-slim as python-base
+FROM python:3.13-slim as python-base
 
 # set environment variables
 ENV PYTHONUNBUFFERED=1 \
